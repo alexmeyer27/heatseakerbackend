@@ -21,5 +21,10 @@ export const placeBet = async (filePath: string): Promise<any> => {
   } catch (error) {
     console.error("Error uploading file:", error);
     throw error;
+  } finally {
+    // Ensure the file is deleted in all cases
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
   }
 };
