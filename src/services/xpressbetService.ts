@@ -1,5 +1,6 @@
-import axios from "axios";
 import * as fs from "fs";
+import FormData from "form-data";
+import axios from "axios";
 
 export const placeBet = async (filePath: string): Promise<any> => {
   try {
@@ -12,13 +13,13 @@ export const placeBet = async (filePath: string): Promise<any> => {
       {
         headers: {
           ...formData.getHeaders(),
-          Authorization: `Bearer ${process.env.XPRESSBET_API_KEY}`,
         },
       }
     );
 
     return response.data;
-  } finally {
-    fs.unlinkSync(filePath); // Clean up the file
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    throw error;
   }
 };

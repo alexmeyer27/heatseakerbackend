@@ -2,13 +2,14 @@ import { Request, Response } from "express";
 import { generateExcelSheet } from "../utils/excelGenerator";
 import { placeBet } from "../services/xpressbetService";
 
-export const handleBetRequest = async (req: Request, res: Response) => {
+export const handleBetRequest = async (req: Request, res: Response): Promise<void> => {
   try {
-    const bets = req.body; // Incoming JSON array from Google Sheets
+    const bets = req.body;
 
     // Validate incoming data
     if (!Array.isArray(bets) || bets.length === 0) {
-      return res.status(400).json({ success: false, message: "Invalid bet data." });
+      res.status(400).json({ success: false, message: "Invalid bet data." });
+      return;
     }
 
     // Generate Excel file for Xpressbet submission
