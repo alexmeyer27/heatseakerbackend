@@ -1,13 +1,26 @@
 {
   "compilerOptions": {
     "target": "ES2021",
-    "module": "CommonJS",
+    "module": "ESNext",
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+		"moduleResolution": "node",
+		"baseUrl": "./",
+		"paths": {
+			"*": ["*"]
+		}
   },
   "include": ["src/**/*.ts", "src/index.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules"],
+	"tsc-alias": {
+    "verbose": false,
+    "resolveFullPaths": true,
+    "fileExtensions": {
+      "inputGlob": "{js,jsx,mjs}",
+      "outputCheck": ["js", "json", "jsx", "mjs"]
+    }
+  }
 }
