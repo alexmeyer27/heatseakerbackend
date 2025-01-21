@@ -25,7 +25,7 @@ describe("Bet Controller", () => {
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith({
       success: false,
-      message: "Invalid bet data or bet type.",
+      message: '"bets" must contain at least 1 items',
     });
   });
 
@@ -41,7 +41,7 @@ describe("Bet Controller", () => {
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith({
       success: false,
-      message: "Invalid bet type provided.",
+      message: '"betType" must be one of [bBet, cBet, dBet, eBet, fBet, gBet]',
     });
   });
 
@@ -79,7 +79,12 @@ describe("Bet Controller", () => {
     await handleBetRequest(req, res);
 
     expect(createBetCsv).toHaveBeenCalledWith(bets, "bBet");
-    expect(placeBet).toHaveBeenCalledWith("./bets-bBet-12345.xlsx");
+    expect(placeBet).toHaveBeenCalledWith(
+      "ABC", // trackCode
+      "bBet", // betType
+      1, // raceNumber
+      "./bets-bBet-12345.xlsx" // filePath
+    );
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       success: true,

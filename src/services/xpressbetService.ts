@@ -33,14 +33,27 @@ export const submitBet = async (filePath: string): Promise<any> => {
     // Delete the file after submission
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
+      logger.info(`File deleted: ${filePath}`);
     }
   }
 };
 
 /**
+ * Generate a unique file name based on date, track, bet type, and race number.
+ */
+export const generateFileName = (track: string, betType: string, raceNumber: number): string => {
+  const date = new Date();
+  const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1)
+    .toString()
+    .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
+  return `${track}-${betType}-Bet-Race-${raceNumber}-${formattedDate}.xlsx`;
+};
+
+/**
  * High-level function to represent the placement of a bet.
  */
-export const placeBet = async (filePath: string): Promise<any> => {
-  // Additional logic (e.g., logging, validation) can be added here later.
+export const placeBet = async (track: string, betType: string, raceNumber: number, filePath: string): Promise<any> => {
+  const fileName = generateFileName(track, betType, raceNumber);
+  logger.info(`Generated file name: ${fileName}`);
   return await submitBet(filePath);
 };
