@@ -1,6 +1,6 @@
 import axios from "axios";
 import * as fs from "fs";
-import { placeBet } from "../../services/xpressbetService";
+import { placeBet, submitBet } from "../../services/xpressbetService";
 import FormData from "form-data";
 
 jest.mock("axios");
@@ -16,34 +16,57 @@ describe("Xpressbet Service", () => {
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
+    jest.clearAllMocks();
   });
 
-  it("should call the Xpressbet API with the correct file", async () => {
-    const mockFormData = new FormData();
-    mockFormData.append("file", fs.createReadStream(filePath));
+  describe("submitBet", () => {
+    it("should call the Xpressbet API with the correct file", async () => {
+      (axios.post as jest.Mock).mockResolvedValue({ data: { success: true } });
 
-    (axios.post as jest.Mock).mockResolvedValue({ data: { success: true } });
+      const result = await submitBet(filePath);
 
-    const result = await placeBet(filePath);
+      expect(axios.post).toHaveBeenCalledWith(
+        "https://dfu.xb-online.com/wagerupload/betupload.aspx",
+        expect.any(FormData), // Match any instance of FormData
+        expect.objectContaining({
+          headers: expect.any(Object), // Match any object for headers
+        })
+      );
 
-    // Validate axios.post call with FormData mock
-    expect(axios.post).toHaveBeenCalledWith(
-      "https://api.xpressbet.com/upload",
-      expect.any(FormData), // Match any instance of FormData
-      expect.objectContaining({
-        headers: expect.any(Object),
-      })
-    );
+      expect(result).toEqual({ success: true });
+    });
 
-    expect(result).toEqual({ success: true });
+    it("should delete the file after submission", async () => {
+      (axios.post as jest.Mock).mockResolvedValue({ data: { success: true } });
+
+      await submitBet(filePath);
+
+      // Ensure the file is deleted
+      expect(fs.existsSync(filePath)).toBe(false);
+    });
+
+    it("should throw an error if the file does not exist", async () => {
+      fs.unlinkSync(filePath); // Remove the file
+
+      await expect(submitBet(filePath)).rejects.toThrow(`File not found: ${filePath}`);
+    });
+
+    it("should throw an error if the API call fails", async () => {
+      (axios.post as jest.Mock).mockRejectedValue({ response: { data: "API error" } });
+
+      await expect(submitBet(filePath)).rejects.toThrow("Bet submission failed: API error");
+    });
   });
 
-  it("should delete the file after submission", async () => {
-    (axios.post as jest.Mock).mockResolvedValue({ data: { success: true } });
+  describe("placeBet", () => {
+    it("should delegate to submitBet", async () => {
+      const mockSubmitBet = jest.fn().mockResolvedValue({ success: true });
+      jest.spyOn(require("../../services/xpressbetService"), "submitBet").mockImplementation(mockSubmitBet);
 
-    await placeBet(filePath);
+      const result = await placeBet(filePath);
 
-    // Ensure the file is deleted after the request
-    expect(fs.existsSync(filePath)).toBe(false);
+      expect(mockSubmitBet).toHaveBeenCalledWith(filePath);
+      expect(result).toEqual({ success: true });
+    });
   });
 });
