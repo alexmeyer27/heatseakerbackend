@@ -4,17 +4,20 @@ FROM node:18-alpine
 # Set the working directory in the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json or yarn.lock
-COPY package*.json ./
+# Copy package.json and yarn.lock
+COPY package.json yarn.lock ./
 
-# Install dependencies
-RUN npm install --production
+# Install dependencies (including devDependencies)
+RUN yarn install --frozen-lockfile
+
+# Globally install TypeScript and required build tools
+RUN yarn global add typescript tsc-alias
 
 # Copy the rest of the application code
 COPY . .
 
 # Build TypeScript code
-RUN npm run build
+RUN yarn run build
 
 # Expose the port that the application will use
 EXPOSE 3000
