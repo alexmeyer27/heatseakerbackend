@@ -20,7 +20,7 @@ COPY . .
 RUN yarn run build
 
 # Expose the port that the application will use
-EXPOSE 3000
+EXPOSE 8080
 
 # Command to run the app
 CMD ["node", "dist/index.js"]
