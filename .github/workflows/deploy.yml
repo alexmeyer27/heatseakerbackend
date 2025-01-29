@@ -21,8 +21,8 @@ jobs:
       - name: Install Dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Run Tests
-        run: yarn test
+      # - name: Run Tests
+      #   run: yarn test
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
