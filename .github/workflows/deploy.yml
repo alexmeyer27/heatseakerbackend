@@ -1,0 +1,56 @@
+name: Deploy HeatSeaker Backend
+
+on:
+  push:
+    branches:
+      - main  # Runs this workflow only when pushing to `main`
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set Up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run Tests
+        run: yarn test
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        run: |
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 962208939254.dkr.ecr.us-east-1.amazonaws.com
+
+      - name: Build & Push Docker Image
+        run: |
+          docker buildx build --platform linux/arm64 -t 962208939254.dkr.ecr.us-east-1.amazonaws.com/heatseaker-backend .
+          docker push 962208939254.dkr.ecr.us-east-1.amazonaws.com/heatseaker-backend
+
+      - name: Deploy to EC2
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+        run: |
+          echo "$SSH_PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+
+          scp -i private_key.pem .env ec2-user@3.82.36.228:/home/ec2-user/.env
+          ssh -i private_key.pem ec2-user@3.82.36.228 << EOF
+            docker pull 962208939254.dkr.ecr.us-east-1.amazonaws.com/heatseaker-backend:latest
+            docker ps -q --filter "publish=8080" | xargs -r docker stop
+            docker ps -aq --filter "publish=8080" | xargs -r docker rm
+            docker run -d -p 8080:8080 --env-file /home/ec2-user/.env 962208939254.dkr.ecr.us-east-1.amazonaws.com/heatseaker-backend:latest
+          EOF
