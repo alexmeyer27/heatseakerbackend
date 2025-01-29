@@ -4,7 +4,7 @@ import betRoutes from "./routes/betRoutes";
 import logger from "./config/logger";
 
 // Load environment variables from .env
-dotenv.config();
+// dotenv.config();
 
 // Initialize the Express app
 const app = express();
@@ -25,7 +25,7 @@ app.use("/api", betRoutes);
 // Dynamically bind to the PORT from environment variables or default to 8080
 const PORT = Number(process.env.PORT) || 8080;
 const server = app.listen(PORT, "0.0.0.0", () => {
-  logger.info(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on port ${process.env.PORT || 8080}`);
 });
 
 // Export the app and server for testing

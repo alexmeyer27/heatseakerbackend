@@ -1,5 +1,5 @@
 # Use the official Node.js image
-FROM node:18-alpine
+FROM node:18-bullseye-slim
 
 # Set the working directory in the container
 WORKDIR /app
@@ -7,11 +7,8 @@ WORKDIR /app
 # Copy package.json and yarn.lock
 COPY package.json yarn.lock ./
 
-# Install dependencies (including devDependencies)
+# Install dependencies
 RUN yarn install --frozen-lockfile
-
-# Globally install TypeScript and required build tools
-RUN yarn global add typescript tsc-alias
 
 # Copy the rest of the application code
 COPY . .
