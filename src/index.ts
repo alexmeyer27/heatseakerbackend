@@ -1,10 +1,10 @@
 import express from "express";
-import dotenv from "dotenv";
+import config from "./config/config"; // Import config.ts
 import betRoutes from "./routes/betRoutes";
 import logger from "./config/logger";
 
-// Load environment variables from .env
-// dotenv.config();
+// Log environment variables (for debugging purposes only; remove in production)
+console.log("Environment variables loaded:", config);
 
 // Initialize the Express app
 const app = express();
@@ -22,10 +22,10 @@ app.get("/health", (req, res) => {
 // Mount other routes
 app.use("/api", betRoutes);
 
-// Dynamically bind to the PORT from environment variables or default to 8080
-const PORT = Number(process.env.PORT) || 8080;
+// Dynamically bind to the PORT from `config.ts`
+const PORT = config.port;
 const server = app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on port ${process.env.PORT || 8080}`);
+  console.log(`Server running on port ${PORT}`);
 });
 
 // Export the app and server for testing
