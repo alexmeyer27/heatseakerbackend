@@ -133,3 +133,6 @@ dist
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+
+# Deploy script
+deploy-ec2.sh

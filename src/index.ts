@@ -1,10 +1,17 @@
 import express from "express";
-import config from "./config/config"; // Import config.ts
+import config from "./config/config";
 import betRoutes from "./routes/betRoutes";
 import logger from "./config/logger";
+import { readFileSync } from "fs";
+import { join } from "path";
+import { fileURLToPath } from "url";
 
-// Log environment variables (for debugging purposes only; remove in production)
-console.log("Environment variables loaded:", config);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = join(__filename, "..");
+
+// Load package.json version dynamically
+const packageJson = JSON.parse(readFileSync(join(__dirname, "../package.json"), "utf-8"));
+const APP_VERSION = packageJson.version;
 
 // Initialize the Express app
 const app = express();
@@ -16,6 +23,7 @@ app.get("/health", (req, res) => {
     status: "UP",
     message: "Application is running smoothly!",
     timestamp: new Date().toISOString(),
+    version: APP_VERSION,
   });
 });
 
