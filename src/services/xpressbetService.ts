@@ -20,7 +20,7 @@ export const submitBet = async (filePath: string): Promise<any> => {
     formData.append("wagr", fs.createReadStream(filePath));
 
     // Make the API request
-    const response = await axios.post(config.xpressbetApiUrl, formData, {
+    const response = await axios.post('https://dfu.xb-online.com/wagerupload/betupload.aspx', formData, {
       headers: formData.getHeaders(),
     });
 

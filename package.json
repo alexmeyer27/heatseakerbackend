@@ -5,15 +5,20 @@
   "repository": "https://github.com/alexmeyer27/heatseakerbackend.git",
   "author": "Alex <alexmeyer@gmail.com>",
   "license": "MIT",
+  "type": "module",
   "scripts": {
-    "start": "node ./src/index.ts",
-    "dev": "nodemon --watch src --exec ts-node src/index.ts",
-    "build": "tsc",
+    "start": "tsx ./src/index.ts",
+    "dev": "nodemon --watch src --exec tsx src/index.ts",
+    "build": "tsc --project tsconfig.json && tsc-alias -p tsconfig.json",
     "lint": "eslint . --ext .ts",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
-  },
+    "test:coverage": "jest --coverage",
+    "build:local": "docker buildx build --platform linux/arm64 -t heatseaker-backend .",
+    "build:deploy": "docker buildx build --platform linux/arm64 --push -t 962208939254.dkr.ecr.us-east-1.amazonaws.com/heatseaker-backend .",
+    "deploy": "yarn build:deploy && yarn ec2:update",
+    "start:local": "docker run -e PORT=8080 -p 8080:8080 heatseaker-backend",
+    "ec2:update": "ssh -i ~/.ssh/aws-ec2-key.pem ec2-user@3.82.36.228 'docker pull 962208939254.dkr.ecr.us-east-1.amazonaws.com/heatseaker-backend:latest && docker ps -q --filter ancestor=962208939254.dkr.ecr.us-east-1.amazonaws.com/heatseaker-backend:latest | xargs -r docker stop && docker run -d -p 8080:8080 962208939254.dkr.ecr.us-east-1.amazonaws.com/heatseaker-backend:latest'"  },
   "dependencies": {
     "@types/supertest": "^6.0.2",
     "axios": "^1.7.9",
@@ -21,6 +26,7 @@
     "express": "^4.21.2",
     "googleapis": "^144.0.0",
     "joi": "^17.13.3",
+    "tsx": "^4.19.2",
     "winston": "^3.17.0",
     "xlsx": "^0.18.5"
   },
@@ -35,7 +41,7 @@
     "nodemon": "^3.1.9",
     "supertest": "^7.0.0",
     "ts-jest": "^29.2.5",
-    "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.10",
     "typescript": "^5.7.3"
   }
 }
