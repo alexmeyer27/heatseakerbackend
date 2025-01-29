@@ -1,6 +1,6 @@
 {
   "name": "heatseakerbackend",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "index.js",
   "repository": "https://github.com/alexmeyer27/heatseakerbackend.git",
   "author": "Alex <alexmeyer@gmail.com>",
