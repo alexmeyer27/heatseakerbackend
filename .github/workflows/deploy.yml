@@ -21,6 +21,11 @@ jobs:
       - name: Install Dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Create .env file
+        run: |
+          echo "API_KEY=${{ secrets.API_KEY }}" > .env
+          echo "PORT=8080" >> .env
+
       # - name: Run Tests
       #   run: yarn test
 
