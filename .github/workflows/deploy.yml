@@ -35,10 +35,12 @@ jobs:
         run: |
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 962208939254.dkr.ecr.us-east-1.amazonaws.com
 
+      - name: Set Up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
       - name: Build & Push Docker Image
         run: |
-          docker buildx build --platform linux/arm64 -t 962208939254.dkr.ecr.us-east-1.amazonaws.com/heatseaker-backend .
-          docker push 962208939254.dkr.ecr.us-east-1.amazonaws.com/heatseaker-backend
+          docker buildx build --platform linux/arm64 --push -t 962208939254.dkr.ecr.us-east-1.amazonaws.com/heatseaker-backend .
 
       - name: Deploy to EC2
         env:
