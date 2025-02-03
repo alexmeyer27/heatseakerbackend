@@ -54,8 +54,21 @@ jobs:
           
           # Fetch EC2 Public IP dynamically
           AWS_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=heatseaker-backend" --query "Reservations[0].Instances[0].PublicIpAddress" --output text)
+          
+          # Debugging output to verify IP is retrieved correctly
+          echo "Resolved EC2 Public IP: $AWS_IP"
+          
+          # Ensure the AWS_IP is not empty before proceeding
+          if [[ -z "$AWS_IP" || "$AWS_IP" == "None" ]]; then
+            echo "❌ ERROR: Unable to retrieve EC2 Public IP. Deployment aborted."
+            exit 1
+          fi
 
-          ssh -o StrictHostKeyChecking=no -i <(echo "$SSH_PRIVATE_KEY") ec2-user@$AWS_IP << EOF
+          # Store SSH private key securely
+          echo "$SSH_PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@$AWS_IP << EOF
             echo "Cleaning up disk space..."
             docker image prune -a -f
             docker container prune -f
