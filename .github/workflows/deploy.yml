@@ -48,7 +48,7 @@ jobs:
         run: |
           docker buildx build --platform linux/arm64 --push -t 962208939254.dkr.ecr.us-east-1.amazonaws.com/heatseaker-backend .
       
-      - name: Free Disk Space on EC2
+      - name: Free Disk Space & Deploy to EC2
         env:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
         run: |
@@ -57,21 +57,14 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -H 3.82.36.228 >> ~/.ssh/known_hosts
           scp -i private_key.pem .env ec2-user@3.82.36.228:/home/ec2-user/.env
+
           ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@3.82.36.228 << EOF
             echo "Cleaning up disk space..."
             docker image prune -a -f
             docker container prune -f
             docker volume prune -f
             df -h
-          EOF
 
-      - name: Deploy to EC2
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
-        run: |
-          echo "$SSH_PRIVATE_KEY" > private_key.pem
-          
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@3.82.36.228 << EOF
             echo "Logging into AWS ECR..."
             aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 962208939254.dkr.ecr.us-east-1.amazonaws.com
 
@@ -82,9 +75,15 @@ jobs:
             docker images  # Debugging: Show available images
 
             IMAGE_NAME="962208939254.dkr.ecr.us-east-1.amazonaws.com/heatseaker-backend:latest"
-            echo "Running Docker with IMAGE_NAME: $IMAGE_NAME"
+            echo "Running Docker with IMAGE_NAME: \$IMAGE_NAME"
 
             docker ps -q --filter "publish=8080" | xargs -r docker stop
             docker ps -aq --filter "publish=8080" | xargs -r docker rm
-            docker run -d -p 8080:8080 --env-file /home/ec2-user/.env $IMAGE_NAME
+
+            if [[ -n "\$IMAGE_NAME" ]]; then
+              docker run -d -p 8080:8080 --env-file /home/ec2-user/.env "\$IMAGE_NAME"
+            else
+              echo "❌ ERROR: IMAGE_NAME is empty! Exiting deployment."
+              exit 1
+            fi
           EOF
