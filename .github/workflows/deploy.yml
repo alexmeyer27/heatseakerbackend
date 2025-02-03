@@ -26,6 +26,9 @@ jobs:
           echo "API_KEY=${{ secrets.API_KEY }}" > .env
           echo "PORT=8080" >> .env
 
+      # - name: Run Tests
+      #   run: yarn test
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -49,26 +52,13 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
         run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -H 3.82.36.228 >> ~/.ssh/known_hosts
-          
-          # Fetch EC2 Public IP dynamically
-          AWS_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=heatseaker-backend" --query "Reservations[0].Instances[0].PublicIpAddress" --output text)
-          
-          # Debugging output to verify IP is retrieved correctly
-          echo "Resolved EC2 Public IP: $AWS_IP"
-          
-          # Ensure the AWS_IP is not empty before proceeding
-          if [[ -z "$AWS_IP" || "$AWS_IP" == "None" ]]; then
-            echo "❌ ERROR: Unable to retrieve EC2 Public IP. Deployment aborted."
-            exit 1
-          fi
-
-          # Store SSH private key securely
           echo "$SSH_PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
+          mkdir -p ~/.ssh
+          ssh-keyscan -H 3.82.36.228 >> ~/.ssh/known_hosts
+          scp -i private_key.pem .env ec2-user@3.82.36.228:/home/ec2-user/.env
 
-          ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@$AWS_IP << EOF
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@3.82.36.228 << EOF
             echo "Cleaning up disk space..."
             docker image prune -a -f
             docker container prune -f
@@ -87,11 +77,9 @@ jobs:
             IMAGE_NAME="962208939254.dkr.ecr.us-east-1.amazonaws.com/heatseaker-backend:latest"
             echo "Running Docker with IMAGE_NAME: \$IMAGE_NAME"
 
-            # Stop and remove old containers
             docker ps -q --filter "publish=8080" | xargs -r docker stop
             docker ps -aq --filter "publish=8080" | xargs -r docker rm
 
-            # Validate IMAGE_NAME before running
             if [[ -n "\$IMAGE_NAME" ]]; then
               docker run -d -p 8080:8080 --env-file /home/ec2-user/.env "\$IMAGE_NAME"
             else
