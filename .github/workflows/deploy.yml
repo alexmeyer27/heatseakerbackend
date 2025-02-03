@@ -52,6 +52,11 @@ jobs:
         env:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
         run: |
+          echo "$SSH_PRIVATE_KEY" > private_key.pem
+          chmod 600 private_key.pem
+          mkdir -p ~/.ssh
+          ssh-keyscan -H 3.82.36.228 >> ~/.ssh/known_hosts
+          scp -i private_key.pem .env ec2-user@3.82.36.228:/home/ec2-user/.env
           ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@3.82.36.228 << EOF
             echo "Cleaning up disk space..."
             docker image prune -a -f
@@ -65,10 +70,6 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key.pem
-          chmod 600 private_key.pem
-          mkdir -p ~/.ssh
-          ssh-keyscan -H 3.82.36.228 >> ~/.ssh/known_hosts
-          scp -i private_key.pem .env ec2-user@3.82.36.228:/home/ec2-user/.env
           
           ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@3.82.36.228 << EOF
             echo "Logging into AWS ECR..."
