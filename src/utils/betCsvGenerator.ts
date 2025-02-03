@@ -25,35 +25,35 @@ export const createBetCsv = (betDetailsArray: BetDetail[], betType: string): str
   if (!Array.isArray(betDetailsArray) || betDetailsArray.length === 0) {
     throw new Error("Bet details array is empty or invalid.");
   }
-  
-  const headers = ["Account", "SubAccount", "Date", "Track Code", "Race Number", "Bet Type", "Horse(s)", "Wheel", "Bet Amount"];
+
   const rows: any[][] = [];
   const eventDate = eventBetDate(); // Use the refactored eventBetDate method
 
   betDetailsArray.forEach((betDetail) => {
     const row: any[] = [
-      "8668", // Account
-      "5556", // SubAccount
-      eventDate, // Date
-      betDetail.trackCode, // Track Code
-      betDetail.raceNumber, // Race Number
-      betDetail.type, // Bet Type
-      betDetail.type === "EXACTA"
-        ? `${betDetail.horseNumber}-${betDetail.exactaHorseNumber}`
-        : betDetail.horseNumber, // Horse(s)
-      "WHEEL", // Wheel
-      betDetail.betAmount || betDetail.placeBetAmount || betDetail.exactaBetAmount, // Bet Amount
+      8668, // Account
+      5556, // Pin
+      eventDate,
+      betDetail.trackCode,
+      betDetail.raceNumber,
+      betDetail.type,
+      betDetail.horseNumber,
+      betDetail.betAmount.toFixed(2) ||
+      betDetail?.placeBetAmount?.toFixed(2) ||
+      betDetail?.exactaBetAmount?.toFixed(2),
+      "WHEEL",
     ];
     rows.push(row);
   });
 
-  // Generate the Excel workbook
-  const workbook = XLSX.utils.book_new();
-  const worksheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+  // Manually construct CSV content
+  const csvContent = rows.map(row => row.join(",")).join("\n");
 
-  XLSX.utils.book_append_sheet(workbook, worksheet, `${betType.toUpperCase()}BETS`);
-  const fileName = `./bets-${betType}-${Date.now()}.xlsx`;
-  XLSX.writeFile(workbook, fileName);
+  // Define the file path
+  const fileName = `./bets-${betType}-${Date.now()}.csv`;
 
-  return fileName; // Return the file path
+  // Write the CSV file manually to ensure proper comma separation
+  fs.writeFileSync(fileName, csvContent, { encoding: "utf-8" });
+
+  return fileName; // Return the CSV file path
 };

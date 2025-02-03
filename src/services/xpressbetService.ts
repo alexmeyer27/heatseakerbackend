@@ -1,4 +1,5 @@
 import axios from "axios";
+import * as cheerio from "cheerio"
 import * as fs from "fs";
 import FormData from "form-data";
 import logger from "../config/logger";
@@ -7,40 +8,71 @@ import logger from "../config/logger";
  * Handles the submission of the Excel file to the Xpressbet API.
  */
 export const submitBet = async (filePath: string): Promise<any> => {
+  let response;
+
   try {
-    // Ensure the file exists
     if (!fs.existsSync(filePath)) {
       logger.error(`File not found: ${filePath}`);
       throw new Error(`File not found: ${filePath}`);
     }
+
     logger.info(`Found file, preparing for submission: ${filePath}`);
 
-    // Create form data
+    // Read file as a full buffer instead of a stream
+    const fileBuffer = fs.readFileSync(filePath);
+
+    // Create form data with proper encoding
     const formData = new FormData();
     formData.append("proc", "wagr");
-    formData.append("wagr", fs.createReadStream(filePath));
+    formData.append("wagr", fileBuffer, { filename: "betfile.csv", contentType: "text/csv" });
 
     logger.info("Submitting bet file to Xpressbet API...");
 
-    // Make the API request
-    const response = await axios.post(
+    response = await axios.post(
       "https://dfu.xb-online.com/wagerupload/betupload.aspx",
       formData,
-      { headers: formData.getHeaders() }
+      {
+        headers: {
+          ...formData.getHeaders(),  // Ensures proper multipart encoding
+        },
+        responseType: "text",
+      }
     );
 
-    logger.info(`Xpressbet API response received`, { status: response.status, data: response.data });
+    logger.info(`Xpressbet API response received: ${response.status}`);
 
-    // Return the response if successful
+    // Extract error message if the response contains HTML
+    if (response.data.includes("<html")) {
+      const $ = cheerio.load(response.data);
+
+      // Find the div that contains wager errors specifically
+      const errorMessages: string[] = [];
+      $("#inva div").each((_, element) => {
+        const text = $(element).text().trim();
+        if (text.length > 0) {
+          errorMessages.push(text);
+        }
+      });
+
+      if (errorMessages.length > 0) {
+        logger.error(`Xpressbet Validation Errors:\n${errorMessages.join("\n")}`);
+      } else {
+        logger.info("No validation errors found in the response.");
+      }
+    }
+
     return response.data;
+
   } catch (error: any) {
     logger.error(`Error uploading file: ${error.message}`, {
       filePath,
-      response: error.response?.data,
+      response: error.response?.data || "No response received",
     });
     throw new Error(`Bet submission failed: ${error.response?.data || error.message}`);
-  } finally {
-    // Delete the file after submission
+
+  }
+  finally {
+    // Ensure response exists before deleting the file
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
       logger.info(`File deleted after submission: ${filePath}`);
@@ -56,7 +88,7 @@ export const generateFileName = (track: string, betType: string, raceNumber: num
   const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1)
     .toString()
     .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
-  return `${track}-${betType}-Bet-Race-${raceNumber}-${formattedDate}.xlsx`;
+  return `${track}-${betType}-Bet-Race-${raceNumber}-${formattedDate}.csv`;
 };
 
 /**
