@@ -39,6 +39,7 @@ jobs:
       - name: Login to Amazon ECR
         run: |
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 962208939254.dkr.ecr.us-east-1.amazonaws.com
+          docker images  # Check if images are available locally
 
       - name: Set Up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -53,18 +54,18 @@ jobs:
         run: |
           echo "$SSH_PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
-
-          # Ensure the .ssh directory exists
           mkdir -p ~/.ssh
-
-          # Add EC2 to known hosts to prevent host key verification failure
           ssh-keyscan -H 3.82.36.228 >> ~/.ssh/known_hosts
-
           scp -i private_key.pem .env ec2-user@3.82.36.228:/home/ec2-user/.env
           
           ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@3.82.36.228 << EOF
-            docker pull ***.dkr.ecr.us-east-1.amazonaws.com/heatseaker-backend:latest
+            docker pull 962208939254.dkr.ecr.us-east-1.amazonaws.com/heatseaker-backend:latest
+            docker images  # Debugging: Show available images
+
+            IMAGE_NAME="962208939254.dkr.ecr.us-east-1.amazonaws.com/heatseaker-backend:latest"
+            echo "Running Docker with IMAGE_NAME: $IMAGE_NAME"
+            
             docker ps -q --filter "publish=8080" | xargs -r docker stop
             docker ps -aq --filter "publish=8080" | xargs -r docker rm
-            docker run -d -p 8080:8080 --env-file /home/ec2-user/.env ***.dkr.ecr.us-east-1.amazonaws.com/heatseaker-backend:latest
+            docker run -d -p 8080:8080 --env-file /home/ec2-user/.env $IMAGE_NAME
           EOF
