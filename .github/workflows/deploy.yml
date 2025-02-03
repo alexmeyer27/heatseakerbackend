@@ -54,8 +54,11 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
 
+          ssh-keyscan -H 3.82.36.228 >> ~/.ssh/known_hosts
+
           scp -i private_key.pem .env ec2-user@3.82.36.228:/home/ec2-user/.env
-          ssh -i private_key.pem ec2-user@3.82.36.228 << EOF
+          
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@3.82.36.228 << EOF
             docker pull 962208939254.dkr.ecr.us-east-1.amazonaws.com/heatseaker-backend:latest
             docker ps -q --filter "publish=8080" | xargs -r docker stop
             docker ps -aq --filter "publish=8080" | xargs -r docker rm
