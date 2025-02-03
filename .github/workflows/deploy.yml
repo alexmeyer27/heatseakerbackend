@@ -47,6 +47,18 @@ jobs:
       - name: Build & Push Docker Image
         run: |
           docker buildx build --platform linux/arm64 --push -t 962208939254.dkr.ecr.us-east-1.amazonaws.com/heatseaker-backend .
+      
+      - name: Free Disk Space on EC2
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+        run: |
+          ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@3.82.36.228 << EOF
+            echo "Cleaning up disk space..."
+            docker image prune -a -f
+            docker container prune -f
+            docker volume prune -f
+            df -h
+          EOF
 
       - name: Deploy to EC2
         env:
