@@ -59,12 +59,18 @@ jobs:
           scp -i private_key.pem .env ec2-user@3.82.36.228:/home/ec2-user/.env
           
           ssh -o StrictHostKeyChecking=no -i private_key.pem ec2-user@3.82.36.228 << EOF
+            echo "Logging into AWS ECR..."
+            aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 962208939254.dkr.ecr.us-east-1.amazonaws.com
+
+            echo "Pulling latest image..."
             docker pull 962208939254.dkr.ecr.us-east-1.amazonaws.com/heatseaker-backend:latest
+
+            echo "Checking available images..."
             docker images  # Debugging: Show available images
 
             IMAGE_NAME="962208939254.dkr.ecr.us-east-1.amazonaws.com/heatseaker-backend:latest"
             echo "Running Docker with IMAGE_NAME: $IMAGE_NAME"
-            
+
             docker ps -q --filter "publish=8080" | xargs -r docker stop
             docker ps -aq --filter "publish=8080" | xargs -r docker rm
             docker run -d -p 8080:8080 --env-file /home/ec2-user/.env $IMAGE_NAME
