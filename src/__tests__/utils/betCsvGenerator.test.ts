@@ -4,10 +4,10 @@ import { createBetCsv, eventBetDate } from "../../utils/betCsvGenerator";
 
 describe("betCsvGenerator", () => {
   const mockBets = [
-		{ trackCode: "ABC", raceNumber: 1, horseNumber: "5", betAmount: 100, type: "WIN" },
-		{ trackCode: "DEF", raceNumber: 2, horseNumber: "3", betAmount: 50, placeBetAmount: 50, type: "PLACE" },
-		{ trackCode: "XYZ", raceNumber: 3, horseNumber: "7", betAmount: 30, exactaBetAmount: 30, exactaHorseNumber: 8, type: "EXACTA" },
-	];
+    { trackCode: "ABC", raceNumber: 1, horseNumber: "5", betAmount: `100.00`, type: "WIN" },
+    { trackCode: "DEF", raceNumber: 2, horseNumber: "3", betAmount: `50.00`, placeBetAmount: `50.00`, type: "PLACE" },
+    { trackCode: "XYZ", raceNumber: 3, horseNumber: "7", betAmount: `30.00`, exactaBetAmount: `30.00`, exactaHorseNumber: 8, type: "EXACTA" },
+  ];
 
   describe("eventBetDate", () => {
     it("should return the date in YYYY-MM-DD format", () => {

@@ -31,7 +31,7 @@ describe("Bet Controller", () => {
 
   it("should return 400 if the betType is invalid", async () => {
     const req = mockRequest({
-      bets: [{ trackCode: "ABC", raceNumber: 1, horseNumber: 5, betAmount: 100, type: "WIN" }],
+      bets: [{ trackCode: "ABC", raceNumber: 1, horseNumber: 5, betAmount: `100.00`, type: "WIN" }],
       betType: "invalidBetType",
     });
     const res = mockResponse();
@@ -47,7 +47,7 @@ describe("Bet Controller", () => {
 
   it("should handle errors during Excel file generation", async () => {
     const bets = [
-      { trackCode: "ABC", raceNumber: 1, horseNumber: 5, betAmount: 100, type: "WIN" },
+      { trackCode: "ABC", raceNumber: 1, horseNumber: 5, betAmount: `100.00`, type: "WIN" },
     ];
     const req = mockRequest({ bets, betType: "bBet" });
     const res = mockResponse();
@@ -68,7 +68,7 @@ describe("Bet Controller", () => {
 
   it("should generate an Excel file and place the bet", async () => {
     const bets = [
-      { trackCode: "ABC", raceNumber: 1, horseNumber: 5, betAmount: 100, type: "WIN" },
+      { trackCode: "ABC", raceNumber: 1, horseNumber: 5, betAmount: `100.00`, type: "WIN" },
     ];
     const req = mockRequest({ bets, betType: "bBet" });
     const res = mockResponse();

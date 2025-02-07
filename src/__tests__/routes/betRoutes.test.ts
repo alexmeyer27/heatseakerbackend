@@ -9,12 +9,12 @@ jest.mock("../../services/xpressbetService");
 describe("Bet Routes", () => {
   const mockBets = {
     bets: [
-      { trackCode: "ABC", raceNumber: 1, horseNumber: 5, betAmount: 100, type: "WIN" },
+      { trackCode: "ABC", raceNumber: 1, horseNumber: 5, betAmount: `100.00`, type: "WIN" },
     ],
     betType: "bBet",
   };
 
-	afterAll(() => {
+  afterAll(() => {
     server.close(); // Ensure the server is closed after all tests
   });
 
