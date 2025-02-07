@@ -38,9 +38,9 @@ export const createBetCsv = (betDetailsArray: BetDetail[], betType: string): str
       betDetail.raceNumber,
       betDetail.type,
       betDetail.horseNumber,
-      betDetail.betAmount.toFixed(2) ||
-      betDetail?.placeBetAmount?.toFixed(2) ||
-      betDetail?.exactaBetAmount?.toFixed(2),
+      betDetail.betAmount ||
+      betDetail?.placeBetAmount ||
+      betDetail?.exactaBetAmount,
       "WHEEL",
     ];
     rows.push(row);
