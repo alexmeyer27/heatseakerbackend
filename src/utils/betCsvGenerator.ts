@@ -5,9 +5,9 @@ interface BetDetail {
   trackCode: string;
   raceNumber: number;
   horseNumber: number | string;
-  betAmount: number;
-  placeBetAmount?: number;
-  exactaBetAmount?: number;
+  betAmount: string;
+  placeBetAmount?: string;
+  exactaBetAmount?: string;
   exactaHorseNumber?: number;
   type: string; // WIN, PLACE, EXACTA
 }

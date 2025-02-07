@@ -6,15 +6,19 @@ export const betSchema = Joi.object({
       Joi.object({
         trackCode: Joi.string().required(),
         raceNumber: Joi.number().integer().positive().required(),
-        horseNumber: Joi.alternatives().try(Joi.string(), Joi.number()).required(),
-        betAmount: Joi.number().positive().optional(),
-        placeBetAmount: Joi.number().positive().optional(),
-        exactaBetAmount: Joi.number().positive().optional(),
+        horseNumber: Joi.alternatives()
+          .try(Joi.string(), Joi.number())
+          .required(),
+        betAmount: Joi.string().required(),
+        placeBetAmount: Joi.string().optional(),
+        exactaBetAmount: Joi.string().optional(),
         exactaHorseNumber: Joi.number().positive().optional(),
         type: Joi.string().valid("WIN", "PLACE", "EXACTA").required(),
       })
     )
     .min(1)
     .required(),
-  betType: Joi.string().valid("aBet", "bBet", "cBet", "dBet", "eBet", "fBet", "gBet").required(),
+  betType: Joi.string()
+    .valid("aBet", "bBet", "cBet", "dBet", "eBet", "fBet", "gBet")
+    .required(),
 });
