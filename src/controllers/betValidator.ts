@@ -16,5 +16,5 @@ export const betSchema = Joi.object({
     )
     .min(1)
     .required(),
-  betType: Joi.string().valid("bBet", "cBet", "dBet", "eBet", "fBet", "gBet").required(),
+  betType: Joi.string().valid("aBet", "bBet", "cBet", "dBet", "eBet", "fBet", "gBet").required(),
 });

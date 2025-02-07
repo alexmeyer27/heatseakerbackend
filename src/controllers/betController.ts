@@ -35,7 +35,7 @@ export const handleBetRequest = async (req: Request, res: Response): Promise<voi
       logger.info("Bet CSV file created", { filePath });
     } catch (error: any) {
       logger.error("Error generating bet file", { error: error.message });
-      res.status(500).json({ success: false, message: "Error generating bet file." });
+      res.status(500).json({ success: false, message: `Error generating bet file: ${error.message}` });
       return;
     }
 
@@ -46,7 +46,7 @@ export const handleBetRequest = async (req: Request, res: Response): Promise<voi
       logger.info("Bet successfully placed", { trackCode, raceNumber, result });
     } catch (error: any) {
       logger.error("Error submitting bet file", { error: error.message });
-      res.status(500).json({ success: false, message: "Error submitting bet file to Xpressbet." });
+      res.status(500).json({ success: false, message: `Error submitting bet file to Xpressbet: ${error.message}` });
       return;
     }
 
