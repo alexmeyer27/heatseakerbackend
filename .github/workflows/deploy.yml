@@ -25,6 +25,8 @@ jobs:
         run: |
           echo "API_KEY=${{ secrets.API_KEY }}" > .env
           echo "PORT=8080" >> .env
+          echo "SLACK_WEBHOOK_URL_ALERTS=${{ secrets.SLACK_WEBHOOK_URL_ALERTS }}" >> .env
+          echo "SLACK_WEBHOOK_URL_ERRORS=${{ secrets.SLACK_WEBHOOK_URL_ERRORS }}" >> .env
 
       # - name: Run Tests
       #   run: yarn test
