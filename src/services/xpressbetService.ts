@@ -7,7 +7,7 @@ import logger from "../config/logger";
 /**
  * Handles the submission of the Excel file to the Xpressbet API.
  */
-export const submitBet = async (filePath: string): Promise<any> => {
+export const submitBet = async (filePath: string, betType: string, bets: any[]): Promise<any> => {
   let response;
 
   try {
@@ -18,13 +18,16 @@ export const submitBet = async (filePath: string): Promise<any> => {
 
     logger.info(`Found file, preparing for submission: ${filePath}`);
 
-    // Read file as a full buffer instead of a stream
     const fileBuffer = fs.readFileSync(filePath);
 
-    // Create form data with proper encoding
     const formData = new FormData();
     formData.append("proc", "wagr");
     formData.append("wagr", fileBuffer, { filename: "betfile.csv", contentType: "text/csv" });
+
+    if (betType === "EXACTA") {
+      formData.append("betCombination", bets[0].betCombination);
+      formData.append("comboType", bets[0].comboType);
+    }
 
     logger.info("Submitting bet file to Xpressbet API...");
 
@@ -33,7 +36,7 @@ export const submitBet = async (filePath: string): Promise<any> => {
       formData,
       {
         headers: {
-          ...formData.getHeaders(),  // Ensures proper multipart encoding
+          ...formData.getHeaders(),
         },
         responseType: "text",
       }
@@ -41,11 +44,8 @@ export const submitBet = async (filePath: string): Promise<any> => {
 
     logger.info(`Xpressbet API response received: ${response.status}`);
 
-    // Extract error message if the response contains HTML
     if (response.data.includes("<html")) {
       const $ = cheerio.load(response.data);
-
-      // Find the div that contains wager errors specifically
       const errorMessages: string[] = [];
       $("#inva div").each((_, element) => {
         const text = $(element).text().trim();
@@ -62,17 +62,13 @@ export const submitBet = async (filePath: string): Promise<any> => {
     }
 
     return response.data;
-
   } catch (error: any) {
     logger.error(`Error uploading file: ${error.message}`, {
       filePath,
       response: error.response?.data || "No response received",
     });
     throw new Error(`Bet submission failed: ${error.response?.data || error.message}`);
-
-  }
-  finally {
-    // Ensure response exists before deleting the file
+  } finally {
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
       logger.info(`File deleted after submission: ${filePath}`);
@@ -94,12 +90,12 @@ export const generateFileName = (track: string, betType: string, raceNumber: num
 /**
  * High-level function to represent the placement of a bet.
  */
-export const placeBet = async (track: string, betType: string, raceNumber: number, filePath: string): Promise<any> => {
+export const placeBet = async (track: string, betType: string, raceNumber: number, filePath: string, bets: any[]): Promise<any> => {
   const fileName = generateFileName(track, betType, raceNumber);
   logger.info(`Generated file name: ${fileName} for track ${track}, race ${raceNumber}, bet type ${betType}`);
 
   try {
-    const response = await submitBet(filePath);
+    const response = await submitBet(filePath, betType, bets);
     logger.info(`Bet successfully placed: ${fileName}`);
     return response;
   } catch (error: any) {

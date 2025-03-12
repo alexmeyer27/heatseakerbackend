@@ -5,10 +5,11 @@ interface BetDetail {
   trackCode: string;
   raceNumber: number;
   horseNumber: number | string;
+  exactaHorseNumbers?: string; // Supports multiple horses in Exacta
   betAmount: string;
   placeBetAmount?: string;
   exactaBetAmount?: string;
-  exactaHorseNumber?: number;
+  comboType?: string; // For Box, Key, or Wheel bets
   type: string; // WIN, PLACE, EXACTA
 }
 
@@ -27,7 +28,7 @@ export const createBetCsv = (betDetailsArray: BetDetail[], betType: string): str
   }
 
   const rows: any[][] = [];
-  const eventDate = eventBetDate(); // Use the refactored eventBetDate method
+  const eventDate = eventBetDate();
 
   betDetailsArray.forEach((betDetail) => {
     const row: any[] = [
@@ -37,22 +38,17 @@ export const createBetCsv = (betDetailsArray: BetDetail[], betType: string): str
       betDetail.trackCode,
       betDetail.raceNumber,
       betDetail.type,
-      betDetail.horseNumber,
-      betDetail.betAmount ||
-      betDetail?.placeBetAmount ||
-      betDetail?.exactaBetAmount,
-      "WHEEL",
+      betType === "EXACTA" ? betDetail.exactaHorseNumbers : betDetail.horseNumber, // Supports Exacta format
+      betDetail.betAmount || betDetail?.placeBetAmount || betDetail?.exactaBetAmount,
+      betType === "EXACTA" ? betDetail.comboType || "WHEEL" : "WHEEL",
     ];
     rows.push(row);
   });
 
-  // Manually construct CSV content
   const csvContent = rows.map(row => row.join(",")).join("\n");
 
-  // Define the file path
   const fileName = `./bets-${betType}-${Date.now()}.csv`;
 
-  // Write the CSV file manually to ensure proper comma separation
   fs.writeFileSync(fileName, csvContent, { encoding: "utf-8" });
 
   return fileName; // Return the CSV file path
