@@ -24,9 +24,14 @@ export const handleBetRequest = async (req: Request, res: Response): Promise<voi
       return;
     }
 
-    // Extract details for file name generation
+    // Extract details for logging and file name generation
     const { trackCode, raceNumber } = bets[0]; // Assuming all bets are for the same track and race
-    logger.info("Bet details extracted", { trackCode, raceNumber, betType });
+    logger.info("Bet details extracted", {
+      trackCode,
+      raceNumber,
+      betType,
+      betCombination: bets[0].betCombination ?? "N/A" // Log the exacta combination if applicable
+    });
 
     // Generate the CSV file for Xpressbet submission
     let filePath: string;
