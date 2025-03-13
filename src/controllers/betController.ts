@@ -47,7 +47,7 @@ export const handleBetRequest = async (req: Request, res: Response): Promise<voi
     // Submit the bet file to Xpressbet
     let result;
     try {
-      result = await placeBet(trackCode, betType, raceNumber, filePath);
+      result = await placeBet(trackCode, betType, raceNumber, filePath, bets);
       logger.info("Bet successfully placed", { trackCode, raceNumber, result });
     } catch (error: any) {
       logger.error("Error submitting bet file", { error: error.message });
