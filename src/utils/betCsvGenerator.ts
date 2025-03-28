@@ -10,7 +10,7 @@ interface BetDetail {
   placeBetAmount?: string;
   exactaBetAmount?: string;
   comboType?: string; // For Box, Key, or Wheel bets
-  type: string; // WIN, PLACE, EXACTA
+  betType: string; // WIN, PLACE, EXACTA
 }
 
 export const eventBetDate = (): string => {
@@ -37,7 +37,7 @@ export const createBetCsv = (betDetailsArray: BetDetail[], betType: string): str
       eventDate,
       betDetail.trackCode,
       betDetail.raceNumber,
-      betDetail.type,
+      betDetail.betType,
       betType === "EXACTA" ? betDetail.exactaHorseNumbers : betDetail.horseNumber, // Supports Exacta format
       betDetail.betAmount || betDetail?.placeBetAmount || betDetail?.exactaBetAmount,
       betType === "EXACTA" ? betDetail.comboType || "WHEEL" : "WHEEL",
