@@ -4,9 +4,9 @@ import { createBetCsv, eventBetDate } from "../../utils/betCsvGenerator";
 
 describe("betCsvGenerator", () => {
   const mockBets = [
-    { trackCode: "ABC", raceNumber: 1, horseNumber: "5", betAmount: `100.00`, type: "WIN" },
-    { trackCode: "DEF", raceNumber: 2, horseNumber: "3", betAmount: `50.00`, placeBetAmount: `50.00`, type: "PLACE" },
-    { trackCode: "XYZ", raceNumber: 3, horseNumber: "7", betAmount: `30.00`, exactaBetAmount: `30.00`, exactaHorseNumber: 8, type: "EXACTA" },
+    { trackCode: "ABC", raceNumber: 1, horseNumber: "5", betAmount: `100.00`, betType: "WIN" },
+    { trackCode: "DEF", raceNumber: 2, horseNumber: "3", betAmount: `50.00`, betType: "PLACE" },
+    { trackCode: "XYZ", raceNumber: 3, betCombination: "7-8", betAmount: `30.00`, betType: "EXACTA" },
   ];
 
   describe("eventBetDate", () => {
@@ -48,8 +48,6 @@ describe("betCsvGenerator", () => {
         "Wheel",
         "Bet Amount",
       ]);
-
-      // Validate rows
       expect(data[1]).toEqual([
         "8668",
         "5556",

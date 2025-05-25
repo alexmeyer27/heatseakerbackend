@@ -12,6 +12,10 @@ describe("Xpressbet Service", () => {
   const mockTrack = "TestTrack";
   const mockBetType = "bBet";
   const mockRaceNumber = 5;
+  const mockBets = [
+    { trackCode: "TEST", raceNumber: 5, horseNumber: "5", betAmount: "10.00", betType: "WIN" },
+    { trackCode: "TEST", raceNumber: 5, betCombination: "5-7", betAmount: "15.00", betType: "EXACTA" }
+  ];
 
   beforeEach(() => {
     fs.writeFileSync(mockFilePath, "dummy data");
@@ -39,7 +43,7 @@ describe("Xpressbet Service", () => {
     it("should call the Xpressbet API with the correct file", async () => {
       (axios.post as jest.Mock).mockResolvedValue({ data: { success: true } });
 
-      const result = await submitBet(mockFilePath);
+      const result = await submitBet(mockFilePath, "WIN", mockBets);
 
       expect(axios.post).toHaveBeenCalledWith(
         "https://dfu.xb-online.com/wagerupload/betupload.aspx",
@@ -77,7 +81,7 @@ describe("Xpressbet Service", () => {
       const mockSubmitBet = jest.fn().mockResolvedValue({ success: true });
       jest.spyOn(require("../../services/xpressbetService"), "submitBet").mockImplementation(mockSubmitBet);
 
-      const result = await placeBet(mockTrack, mockBetType, mockRaceNumber, mockFilePath);
+      const result = await placeBet(mockTrack, mockBetType, mockRaceNumber, mockFilePath, mockBets);
 
       const date = new Date();
       const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1)

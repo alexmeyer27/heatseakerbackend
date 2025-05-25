@@ -23,8 +23,6 @@ export const betSchema = Joi.object({
 
       // ✅ **Keep `betAmount`, alias `dollarAmount` for compatibility**
       betAmount: Joi.string().required(),  // 🔒 Existing field remains unchanged
-      dollarAmount: Joi.string().optional(), // 📝 Introduced for future use, but does not replace betAmount
-      placeBetAmount: Joi.string().optional(),
 
       // ✅ **Make `comboType` optional for backward compatibility**
       comboType: Joi.when('betType', {
